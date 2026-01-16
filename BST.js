@@ -1,3 +1,5 @@
+const DEFAULT_QUEUE_CAPACITY = 8;
+
 function createNode(data) {
   return {
     data,
@@ -6,25 +8,70 @@ function createNode(data) {
   }
 }
 
-// const queuePrototype = {
-//   enqueue() {
-//     if (this.size === 0) {
+const queuePrototype = {
+  isEmpty() {
+    if (this.size === 0) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  isFull() {
+    if (this.size === this.capacity) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  enqueue(value) {
+    if (this.isFull()) {
+      this._resize(this.capacity * 2);
+    }
 
-//     } 
-//   }
-// }
+    this.arr[this.rear] = value;
+    this.rear = (this.rear + 1) % this.capacity;
+    this.size++;
+  },
+  dequeue() {
+    if (this.isEmpty()) {
+      throw new Error("Queue is empty");
+    }
+    
+    const value = this.arr[this.front];
+    this.front = (this.front + 1) % this.capacity;
+    this.size--;
+    return value;
+  },
+  peek() {
+    if (this.isEmpty()) {
+      throw new Error("Queue is empty");
+    }
 
-// function createQueue(capacity) {
-//   const queue =  Object.create(queuePrototype);
-//   queue.arr = new Array(capacity);
+    return this.arr[this.front];
+  },
+  _resize(newCapacity) {
+    let newArr = new Array(newCapacity);
 
-//   return {
-//     front: 0,
-//     rear: 0,
-//     capacity,
-//     size
-//   }
-// }
+    for (let i = 0; i < this.size; i++) {
+      newArr[i] = this.arr[(this.front + i) % this.capacity];
+    }
+
+    this.arr = newArr;
+    this.capacity = newCapacity;
+    this.front = 0;
+    this.rear = this.size;
+  }
+}
+
+function createQueue(capacity = DEFAULT_QUEUE_CAPACITY) {
+  const queue =  Object.create(queuePrototype);
+  queue.arr = new Array(capacity);
+  queue.size = 0;
+  queue.front = 0;
+  queue.rear = 0;
+  queue.capacity = capacity;
+  return queue;
+}
 
 const treePrototype = {
   buildTree(array, start = 0, end = array.length - 1) {
@@ -105,6 +152,22 @@ const treePrototype = {
     }
 
     return null;
+  },
+  levelOrderForEachIterative(callback) {
+    if (typeof callback !== 'function') {
+      throw new Error("Provided Callback isn't a function");
+    }
+    const Q = createQueue();
+    Q.enqueue(this.root);
+
+    while (!Q.isEmpty()) {
+      const curr = Q.dequeue();
+      if (curr !== null) {
+        callback(curr);
+        Q.enqueue(curr.left);
+        Q.enqueue(curr.right);
+      }
+    }
   }
 }
 
@@ -131,8 +194,9 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
   }
 };
 
+
+
 const tree = createTree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324, 89, 43, 95, 76, 32, 11]);
 tree.deleteItem(76);
 prettyPrint(tree.root);
-tree.insertIterative(123);
-prettyPrint(tree.find(89));
+tree.levelOrderForEachIterative(console.log);
