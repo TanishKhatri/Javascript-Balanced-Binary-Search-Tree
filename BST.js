@@ -244,6 +244,32 @@ const treePrototype = {
     }
 
     return hRecursively(node);
+  },
+  depth(value) {
+    let found = false;
+    return depthRecursive(value, this.root)
+    function depthRecursive(value, rootNode) {
+      if (rootNode.data === value) {
+        found = true;
+        return 0;
+      }
+
+      let leftDepth, rightDepth = 0;
+
+      if (value > rootNode.data && rootNode.right !== null) {
+        rightDepth = depthRecursive(value, rootNode.right, found) + 1;
+      } 
+      
+      if (value < rootNode.data && rootNode.left !== null) {
+        leftDepth = depthRecursive(value, rootNode.left, found) + 1;
+      }
+
+      if (!found) {
+        return null;
+      }
+
+      return leftDepth > rightDepth ? leftDepth : rightDepth;
+    }
   }
 }
 
@@ -279,4 +305,4 @@ prettyPrint(tree.root);
 // tree.levelOrderForEachRecursive((item) => {console.log(item.data)});
 // console.log("\n\n");
 // tree.preOrderForEach((item) => {console.log(item.data)});
-console.log(tree.height(43));
+console.log(tree.depth(225));
