@@ -192,6 +192,30 @@ const treePrototype = {
         callback(item);
       });
     }
+  },
+  preOrderForEach(callback, rootNode = this.root) {
+    if (rootNode === null) {
+      return;
+    }
+    callback(rootNode);
+    this.preOrderForEach(callback, rootNode.left);
+    this.preOrderForEach(callback, rootNode.right);
+  },
+  inOrderForEach(callback) {
+    if (rootNode === null) {
+      return;
+    }
+    this.preOrderForEach(callback, rootNode.left);
+    callback(rootNode);
+    this.preOrderForEach(callback, rootNode.right);
+  },
+  postOrderForEach(callback) {
+    if (rootNode === null) {
+      return;
+    }
+    this.preOrderForEach(callback, rootNode.left);
+    this.preOrderForEach(callback, rootNode.right);
+    callback(rootNode);
   }
 }
 
@@ -223,5 +247,7 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
 const tree = createTree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324, 89, 43, 95, 76, 32, 11]);
 tree.deleteItem(76);
 prettyPrint(tree.root);
-tree.levelOrderForEachIterative((item) => {console.log(item.data)});
-tree.levelOrderForEachRecursive((item) => {console.log(item.data)});
+// tree.levelOrderForEachIterative((item) => {console.log(item.data)});
+// tree.levelOrderForEachRecursive((item) => {console.log(item.data)});
+console.log("\n\n");
+tree.preOrderForEach((item) => {console.log(item.data)});
