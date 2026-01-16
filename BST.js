@@ -201,21 +201,49 @@ const treePrototype = {
     this.preOrderForEach(callback, rootNode.left);
     this.preOrderForEach(callback, rootNode.right);
   },
-  inOrderForEach(callback) {
+  inOrderForEach(callback, rootNode = this.root) {
     if (rootNode === null) {
       return;
     }
-    this.preOrderForEach(callback, rootNode.left);
+    this.inOrderForEach(callback, rootNode.left);
     callback(rootNode);
-    this.preOrderForEach(callback, rootNode.right);
+    this.inOrderForEach(callback, rootNode.right);
   },
-  postOrderForEach(callback) {
+  postOrderForEach(callback, rootNode = this.root) {
     if (rootNode === null) {
       return;
     }
-    this.preOrderForEach(callback, rootNode.left);
-    this.preOrderForEach(callback, rootNode.right);
+    this.postOrderForEach(callback, rootNode.left);
+    this.postOrderForEach(callback, rootNode.right);
     callback(rootNode);
+  },
+  height(value) {
+    let node = this.find(value);
+
+    if (node === null) {
+      return null;
+    }
+    // The height of a node is the height of max(height of left node + 1, height of right node + 1);
+    function hRecursively(node) {
+      if (node.left === null && node.right === null) {
+        return 0;
+      }
+      
+      let leftHeight = 0;
+      let rightHeight = 0;
+
+      if (node.left !== null) {
+        leftHeight = hRecursively(node.left) + 1
+      }
+      
+      if (node.right !== null) {
+        rightHeight = hRecursively(node.right) + 1;
+      }
+
+      return leftHeight > rightHeight ? leftHeight : rightHeight;
+    }
+
+    return hRecursively(node);
   }
 }
 
@@ -249,5 +277,6 @@ tree.deleteItem(76);
 prettyPrint(tree.root);
 // tree.levelOrderForEachIterative((item) => {console.log(item.data)});
 // tree.levelOrderForEachRecursive((item) => {console.log(item.data)});
-console.log("\n\n");
-tree.preOrderForEach((item) => {console.log(item.data)});
+// console.log("\n\n");
+// tree.preOrderForEach((item) => {console.log(item.data)});
+console.log(tree.height(43));
