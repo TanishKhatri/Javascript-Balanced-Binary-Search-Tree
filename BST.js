@@ -168,6 +168,30 @@ const treePrototype = {
         Q.enqueue(curr.right);
       }
     }
+  },
+  levelOrderForEachRecursive(callback) {
+    let result = [];
+    recursiveLO(this.root, result, 0);
+    function recursiveLO(rootNode, result, level) {
+      if (rootNode === null) {
+        return;
+      }
+
+      if (result.length <= level) {
+        result.push([]);
+      }
+
+      result[level].push(rootNode);
+      
+      recursiveLO(rootNode.left, result, level + 1);
+      recursiveLO(rootNode.right, result, level + 1);
+    }
+
+    for (let level of result) {
+      level.forEach(item => {
+        callback(item);
+      });
+    }
   }
 }
 
@@ -199,4 +223,5 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
 const tree = createTree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324, 89, 43, 95, 76, 32, 11]);
 tree.deleteItem(76);
 prettyPrint(tree.root);
-tree.levelOrderForEachIterative(console.log);
+tree.levelOrderForEachIterative((item) => {console.log(item.data)});
+tree.levelOrderForEachRecursive((item) => {console.log(item.data)});
