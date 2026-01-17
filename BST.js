@@ -217,33 +217,32 @@ const treePrototype = {
     this.postOrderForEach(callback, rootNode.right);
     callback(rootNode);
   },
+  _hRecursively(node) {
+    if (node.left === null && node.right === null) {
+      return 0;
+    }
+    
+    let leftHeight = 0;
+    let rightHeight = 0;
+
+    if (node.left !== null) {
+      leftHeight = this._hRecursively(node.left) + 1
+    }
+    
+    if (node.right !== null) {
+      rightHeight = this._hRecursively(node.right) + 1;
+    }
+
+    return leftHeight > rightHeight ? leftHeight : rightHeight;
+  },
   height(value) {
     let node = this.find(value);
 
     if (node === null) {
       return null;
     }
-    // The height of a node is the height of max(height of left node + 1, height of right node + 1);
-    function hRecursively(node) {
-      if (node.left === null && node.right === null) {
-        return 0;
-      }
-      
-      let leftHeight = 0;
-      let rightHeight = 0;
-
-      if (node.left !== null) {
-        leftHeight = hRecursively(node.left) + 1
-      }
-      
-      if (node.right !== null) {
-        rightHeight = hRecursively(node.right) + 1;
-      }
-
-      return leftHeight > rightHeight ? leftHeight : rightHeight;
-    }
-
-    return hRecursively(node);
+    // The height of a node is the height of max(height of left node + 1, height of right node + 1)
+    return this._hRecursively(node);
   },
   depth(value) {
     let found = false;
@@ -270,6 +269,34 @@ const treePrototype = {
 
       return leftDepth > rightDepth ? leftDepth : rightDepth;
     }
+  },
+  isBalanced(node = this.root, balance = true) {
+    if (!balance) {
+      return balance;
+    }
+
+    let leftHeight, rightHeight = 0;
+    if (node.left !== null) {
+      leftHeight = this._hRecursively(node.left);
+    } 
+    if (node.right !== null) {
+      rightHeight = this._hRecursively(node.right);
+    }
+
+    if (leftHeight > rightHeight) {
+      balance = (leftHeight - rightHeight === 1);
+    } else {
+      balance = (rightHeight - leftHeight === 0) || (rightHeight - leftHeight === 0);
+    }
+
+    if (!balance) {
+      return balance;
+    }
+
+    this.isBalanced(node.left, balance);
+    this.isBalanced(node.right, balance);
+
+    return balance;
   }
 }
 
@@ -299,10 +326,4 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
 
 
 const tree = createTree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324, 89, 43, 95, 76, 32, 11]);
-tree.deleteItem(76);
 prettyPrint(tree.root);
-// tree.levelOrderForEachIterative((item) => {console.log(item.data)});
-// tree.levelOrderForEachRecursive((item) => {console.log(item.data)});
-// console.log("\n\n");
-// tree.preOrderForEach((item) => {console.log(item.data)});
-console.log(tree.depth(225));
