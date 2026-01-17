@@ -218,22 +218,11 @@ const treePrototype = {
     callback(rootNode);
   },
   _hRecursively(node) {
-    if (node.left === null && node.right === null) {
+    if (node === null) {
       return 0;
     }
     
-    let leftHeight = 0;
-    let rightHeight = 0;
-
-    if (node.left !== null) {
-      leftHeight = this._hRecursively(node.left) + 1
-    }
-    
-    if (node.right !== null) {
-      rightHeight = this._hRecursively(node.right) + 1;
-    }
-
-    return leftHeight > rightHeight ? leftHeight : rightHeight;
+    return 1 + Math.max(this._hRecursively(node.left), this._hRecursively(node.right));
   },
   height(value) {
     let node = this.find(value);
@@ -270,33 +259,16 @@ const treePrototype = {
       return leftDepth > rightDepth ? leftDepth : rightDepth;
     }
   },
-  isBalanced(node = this.root, balance = true) {
-    if (!balance) {
-      return balance;
+  isBalanced(node = this.root) {
+    if (node === null) {
+      return true;
     }
 
-    let leftHeight, rightHeight = 0;
-    if (node.left !== null) {
-      leftHeight = this._hRecursively(node.left);
-    } 
-    if (node.right !== null) {
-      rightHeight = this._hRecursively(node.right);
-    }
+    const lHeight = this._hRecursively(node.left);
+    const rHeight = this._hRecursively(node.right);
 
-    if (leftHeight > rightHeight) {
-      balance = (leftHeight - rightHeight === 1);
-    } else {
-      balance = (rightHeight - leftHeight === 0) || (rightHeight - leftHeight === 0);
-    }
-
-    if (!balance) {
-      return balance;
-    }
-
-    this.isBalanced(node.left, balance);
-    this.isBalanced(node.right, balance);
-
-    return balance;
+    if (Math.abs(lHeight - rHeight) > 1) return false;
+    return this.isBalanced(node.left) && this.isBalanced(node.right);
   },
   rebalance() {
     let newArr = [];
@@ -330,13 +302,3 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
 };
 
 const tree = createTree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324, 89, 43, 95, 76, 32, 11]);
-console.log(tree.isBalanced());
-tree.insertIterative(19);
-tree.insertIterative(3449);
-tree.insertIterative(67);
-console.log(tree.isBalanced());
-prettyPrint(tree.root);
-console.log(tree.isBalanced());
-tree.rebalance();
-prettyPrint(tree.root);
-console.log(tree.isBalanced());
