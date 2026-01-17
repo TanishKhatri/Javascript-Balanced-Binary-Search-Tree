@@ -273,7 +273,6 @@ const treePrototype = {
   rebalance() {
     let newArr = [];
     this.inOrderForEach((node) => {newArr.push(node.data)});
-    console.log(newArr);
     this.root = this.buildTree(newArr);
   }
 }
@@ -301,4 +300,4 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
   }
 };
 
-const tree = createTree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324, 89, 43, 95, 76, 32, 11]);
+export {createTree, prettyPrint};
