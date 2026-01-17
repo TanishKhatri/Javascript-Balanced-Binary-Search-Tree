@@ -84,6 +84,10 @@ const treePrototype = {
     return root;
   },
   insertIterative(value) {
+    if (this.root === null) {
+      this.root = createNode(value)
+      return true;
+    }
     let travelNode = this.root;
     while(true) {
       if (value > travelNode.data) {
@@ -112,29 +116,32 @@ const treePrototype = {
     }
     return node;
   },
-  deleteItem(value, rootNode = this.root) {
-    //USE rootNode NOT root 
+  _deleteRecursively(value, rootNode) {
     if (rootNode === null) {
-      return rootNode;
+      return null;
     }
 
     if (rootNode.data > value) {
-      rootNode.left = this.deleteItem(value, rootNode.left);
+      rootNode.left = this._deleteRecursively(value, rootNode.left);
     } else if (rootNode.data < value) {
-      rootNode.right = this.deleteItem(value, rootNode.right);
+      rootNode.right = this._deleteRecursively(value, rootNode.right);
     } else {
       if (rootNode.left === null) {
         return rootNode.right;
-      } else if (rootNode.right === null) {
+      } 
+      if (rootNode.right === null) {
         return rootNode.left;
-      } else {
-        const successor = this.getSuccessor(rootNode);
-        rootNode.data = successor.data;
-        rootNode.right = this.deleteItem(successor.data, rootNode.right);
       }
+      
+      const successor = this.getSuccessor(rootNode);
+      rootNode.data = successor.data;
+      rootNode.right = this._deleteRecursively(successor.data, rootNode.right);
     }
 
     return rootNode;
+  },
+  deleteItem(value) {
+    this.root = this._deleteRecursively(value, this.root);
   },
   find(value, rootNode = this.root) {
     if (rootNode === null) {
@@ -157,19 +164,27 @@ const treePrototype = {
     if (typeof callback !== 'function') {
       throw new Error("Provided Callback isn't a function");
     }
+    if (this.root === null) {
+      throw new Error("Root is Empty");
+    }
     const Q = createQueue();
     Q.enqueue(this.root);
 
     while (!Q.isEmpty()) {
       const curr = Q.dequeue();
-      if (curr !== null) {
-        callback(curr);
+      callback(curr);
+      if (curr.left !== null) {
         Q.enqueue(curr.left);
+      }
+      if (curr.right !== null) {
         Q.enqueue(curr.right);
       }
     }
   },
   levelOrderForEachRecursive(callback) {
+    if (typeof callback !== 'function') {
+      throw new Error("Provided Callback isn't a function");
+    }
     let result = [];
     recursiveLO(this.root, result, 0);
     function recursiveLO(rootNode, result, level) {
@@ -233,42 +248,23 @@ const treePrototype = {
     // The height of a node is the height of max(height of left node + 1, height of right node + 1)
     return this._hRecursively(node);
   },
-  depth(value) {
-    let found = false;
-    return depthRecursive(value, this.root)
-    function depthRecursive(value, rootNode) {
-      if (rootNode.data === value) {
-        found = true;
-        return 0;
-      }
-
-      let leftDepth, rightDepth = 0;
-
-      if (value > rootNode.data && rootNode.right !== null) {
-        rightDepth = depthRecursive(value, rootNode.right, found) + 1;
-      } 
-      
-      if (value < rootNode.data && rootNode.left !== null) {
-        leftDepth = depthRecursive(value, rootNode.left, found) + 1;
-      }
-
-      if (!found) {
-        return null;
-      }
-
-      return leftDepth > rightDepth ? leftDepth : rightDepth;
-    }
+  depth(value, node = this.root, d = 0) {
+    if (!node) return null;
+    if (node.data === value) return d;
+    if (value < node.data) return this.depth(value, node.left, d + 1);
+    return this.depth(value, node.right, d + 1);
   },
   isBalanced(node = this.root) {
-    if (node === null) {
-      return true;
+    function check(n) {
+      if (!n) return 0;
+      const l = check(n.left);
+      if (l === -1) return -1;
+      const r = check(n.right);
+      if (r === -1) return -1;
+      if (Math.abs(l - r) > 1) return -1;
+      return 1 + Math.max(l, r);
     }
-
-    const lHeight = this._hRecursively(node.left);
-    const rHeight = this._hRecursively(node.right);
-
-    if (Math.abs(lHeight - rHeight) > 1) return false;
-    return this.isBalanced(node.left) && this.isBalanced(node.right);
+    return check(node) !== -1;
   },
   rebalance() {
     let newArr = [];
@@ -299,5 +295,7 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
     prettyPrint(node.left, `${prefix}${isLeft ? '    ' : '│   '}`, true);
   }
 };
+const tree = createTree([10, 15]);
+prettyPrint(tree.root);
 
 export {createTree, prettyPrint};
